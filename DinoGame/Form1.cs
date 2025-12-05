@@ -30,7 +30,7 @@ namespace DinoGame
         int dinoJump = 3;//asta ma gandeam sa o folosim pentru saritura,
                          //atunci cand apesi space PLAYER-ul sare cu 3 pozitii in sus ca sa evitam obstacolele
         int laCateSecunde = int.MaxValue;  //doar am initializat randomizarea obstacolului
-        int TipObstacol;// Sa fie mai multe tipuri de obstacole nu doar unul singur 
+        int TipObstacol=900;// Sa fie mai multe tipuri de obstacole nu doar unul singur 
         bool isJumping = false;
         bool isUp = false;
         int jumpStep = 0;//numarul de pasi facuti in saritura
@@ -86,10 +86,15 @@ namespace DinoGame
 
        void  GenerareObstacol()
         {
-           // if(tipObstacol ==1)
-            Board[59][10] = (int)PATRATE.OBSTACOL;
-            
+            TipObstacol = 2;//rand.Next()%2+1;
+            switch (TipObstacol)
+            {
+                case 1: Board[59][11] = (int)PATRATE.OBSTACOL; break;
+                case 2: Board[58][10] = (int)PATRATE.OBSTACOL; break;
+            }
         }
+
+
         private void pressSpace(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Space && !isJumping)
@@ -160,11 +165,23 @@ namespace DinoGame
                         b = pensula[(int)PATRATE.NOROI];
                     if (Board[i][j] == (int)PATRATE.OBSTACOL)
                     {
+                        switch (TipObstacol)
+                        {
+                            case 1:
+                                Classes.Spike temp = new Classes.Spike(i, j, DIMENSIUNE);
+                                g.FillPolygon(b, temp.spike);
+                                break;
+
+                            case 2:
+                              
+                                Classes.SpikeMare tempMare = new Classes.SpikeMare(i, j, DIMENSIUNE);
+
+                                g.FillRectangle(b, tempMare.Patrat);
+                                g.FillPolygon(b, tempMare.spike); 
+                                break;
+                        }
 
 
-                      Classes.Spike temp = new Classes.Spike(DIMENSIUNE);
-
-                        g.FillPolygon(b, temp.spike);
                     }
                     else { g.FillRectangle(b, i * DIMENSIUNE + 1, j * DIMENSIUNE + 1, DIMENSIUNE - 1, DIMENSIUNE - 1); }
                     

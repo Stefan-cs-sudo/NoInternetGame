@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,6 +13,12 @@ namespace DinoGame
 {
     public partial class FormDino : Form
     {
+        Bitmap canvas;    //Deci la drawBoard am facut niste modificari
+        Graphics g;                //cand  ajunge mai sus de nivelul player-ului sa schimbam culoarea astfel incat s-avem pamant/surface
+                                   //faza e ca facea un flicker urat de tot si am cautat si cica picture box nu e bun pentru grafice si  sa folosim 
+                                   // Bitmap-uri ca ii putem da picturebox=bitmap si e aceeasi chestie far fara flicker
+
+
         int DIMENSIUNE = 20;
         PictureBox pictureBox;
         int[][] Board;
@@ -33,17 +40,25 @@ namespace DinoGame
             GOL = 0,
             PLAYER = 1,
             OBSTACOL = 2,
+            IARBA=3,
+            NOROI=4,
 
         }
         public FormDino()
         {
             InitializeComponent();
-            mDesen = pictureBox1.CreateGraphics();
 
-            pensula = new SolidBrush[3];
+            canvas = new Bitmap(60 * DIMENSIUNE, 20 * DIMENSIUNE);
+            g = Graphics.FromImage(canvas);
+            pictureBox1.Image = canvas;
+
+
+            pensula = new SolidBrush[5];
             pensula[0] = new SolidBrush(Color.White);
             pensula[1] = new SolidBrush(Color.Blue);
             pensula[2] = new SolidBrush(Color.Red);
+            pensula[3] = new SolidBrush(Color.GreenYellow);
+            pensula[4] = new SolidBrush(Color.Brown);
 
             gameTimer = new Timer();
             gameTimer.Interval = 100;
@@ -85,7 +100,7 @@ namespace DinoGame
 
         void drawBoard()
         {
-            mDesen.Clear(Color.White);
+            g.Clear(Color.White);
 
             for (int i = 0; i < 60; i++)
                 Array.Clear(Board[i], 0, 20);
@@ -96,16 +111,26 @@ namespace DinoGame
             {
                 for (int j = 0; j < 20; j++)
                 {
-                    mDesen.FillRectangle(pensula[Board[i][j]], i * DIMENSIUNE + 1, j * DIMENSIUNE + 1, DIMENSIUNE - 1, DIMENSIUNE - 1);
+                    Brush b;
+
+                    if (j < 11)
+                        b = pensula[Board[i][j]];
+                    else if (j == 11)
+                        b = pensula[(int)PATRATE.IARBA];
+                    else
+                        b = pensula[(int)PATRATE.NOROI];
+
+                    g.FillRectangle(b,  i * DIMENSIUNE + 1,  j * DIMENSIUNE + 1, DIMENSIUNE - 1,DIMENSIUNE - 1);
                 }
             }
 
+            pictureBox1.Refresh(); 
         }
 
+
         void drawDino(int y)
-        {
-            Board[dinoX][y] = (int)PATRATE.PLAYER;
-            mDesen.FillRectangle(pensula[(int)PATRATE.PLAYER], dinoX * DIMENSIUNE + 1, dinoY * DIMENSIUNE + 1, DIMENSIUNE - 1, DIMENSIUNE - 1);
+        {                                                                 //fill Rectangle  nu era necesar
+            Board[dinoX][y] = (int)PATRATE.PLAYER; //adineauri desenai dino-ul aici dar nu era nevoie ca oricum in drawboard il deseneaza inca odata
         }
 
         private void UpdateGame()
